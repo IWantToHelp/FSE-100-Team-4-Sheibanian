@@ -2,72 +2,82 @@
 %Ports and their devices
 % A 
 % B Claw Motor
-% C Right Motor
-% D Left Motor
-% 1 Color Sensor
-% 2 Sound Sensor
-% 3 Gyro Sensor
-% 4 
+% C Left Motor
+% D Right Motor
+% 1 Touch Sensor
+% 2 Color Sensor
+% 3 Sound Sensor
+% 4 Gyro Sensor
 % Mode of Color Sensor: Color Code
 % Motor Speed: 100 
 ClawPort = 'B';
-MotorPortLeft = 'D';
-MotorPortRight = 'C';
-ColorSensorPort = 1;
-SoundSensorPort = 2;
-GyroSensorPort = 3;
+MotorPortLeft = 'C';
+MotorPortRight = 'D';
+TouchSensorPort = 1; 
+ColorSensorPort = 2;
+SoundSensorPort = 3;
+GyroSensorPort = 4;
+
+%CONNECTS TO EV3
 brick = ConnectBrick('EV3G');
+%Sets the color sensor to output color in terms of integers
 brick.SetColorMode(ColorSensorPort, 2)
+%Sets the current gyro to 0
 brick.GyroCalibrate(GyroSensorPort);
-MotorSpeed = 10;
-run("keyboard_control.m")
-%brick.MoveMotor(MotorPortRight, MotorSpeed);
-%pause(10);
-%brick.MoveMotor(MotorPortLeft, MotorSpeed);
-%pause(10);
-%brick.StopMotor(MotorPortLeft, 'Brake');
-%brick.StopMotor(MotorPortRight, 'Brake');
+%Current speed of robot during autonomous movement
+AutoSpeed = 30;
+%0	No color (Unknown color) 
+%1	Black 
+%2	Blue 
+%3	Green 
+%4	Yellow 
+%5	Red 
+%6	White 
+%7	Brown
+destinationColor = 4;
+%Maximum distance from wall
+wallDist = 10;
+%Sets the calibrates gyro
+brick.GyroCalibrate(GyroSensorPort);
+run("keyboard_control.m");
 while 1
     color = brick.ColorCode(ColorSensorPort);
     disp(color);
-    %distance = brick.UltrasonicDist(SoundSensorPort);
-    %disp(distance);
-    %angle = brick.GyroAngle(GyroSensorPort);
-    %disp(angle);
-    %rotate 90 right
-    %color = readColor(colorSensor);
-    %soundLevel = readSoundLevel(soundSensor);
-    %isTouched = readTouch(touchSensor);
-
-    %if isTouched
-    %    motorLeft.Speed = -30;
-%        motorRight.Speed = -30;
- %       pause(1);
-  %      motorLeft.Speed = 30;
-   %     motorRight.Speed = -30;
-    %    pause(1);
-    %elseif soundLevel > 50
-     %   motorLeft.Speed = 0;
-     %   motorRight.Speed = 0;
-    %elseif strcmp(color, 'black')
-    %    motorLeft.Speed = 30;
-    %    motorRight.Speed = -30;
-    %else
-     %   motorLeft.Speed = 30;
-      %  motorRight.Speed = -30;
-    %end
-
-    pause(1);
-
-    %rotate 90 left
-% %    run("keyboard_control.m")4
-%    brick.MoveMotor(MotorPortRight, MotorSpeed);
-%    pause(10);
-%    brick.MoveMotor(MotorPortLeft, MotorSpeed);
-%    pause(10);
-%    brick.StopMotor(MotorPortLeft, 'Brake');
-%    brick.StopMotor(MotorPortRight, 'Brake');
+    distance = brick.UltrasonicDist(SoundSensorPort);
+    disp(distance);
+    angle = brick.GyroAngle(GyroSensorPort);
+    disp(angle);
+    isTouched = brick.TouchPressed(TouchSensorPort);
+    disp(isTouched);
+    if color == destinationColor
+        %We start manually controlling the car if we reach the destination
+        %color
+        run("keyboard_control.m");
+    elseif distance < wallDist
+        if isTouched
+           % moves the car back a little bit and turns the car right, 
+           % cause the car sees that there's a wall to the left and that 
+           % there's a wall to the front
+           brick.MoveMotor(MotorPortLeft, -AutoSpeed);
+           brick.MoveMotor(MotorPortRight, -AutoSpeed);
+           pause(.1);
+           brick.MoveMotor(MotorPortLeft, AutoSpeed);
+           brick.MoveMotor(MotorPortRight, -AutoSpeed);
+           pause(3);
+        else
+        % The car sees that there's a wall to the left, but doesn't see 
+        % that there's a wall in front of it, so it continues moving
+        % forward
+        brick.MoveMotor(MotorPortLeft, AutoSpeed);
+        brick.MoveMotor(MotorPortRight, AutoSpeed);
+        pause(.1);
+        end
+    else
+        % The car sees that there's no wall to its left, so it turns left
+        brick.MoveMotor(MotorPortLeft, -AutoSpeed);
+        brick.MoveMotor(MotorPortRight, AutoSpeed);
+        pause(3);
+    end
+    brick.StopMotor(MotorPortLeft, 'Brake');
+    brick.StopMotor(MotorPortRight, 'Brake');
 end
-brick.MoveMotor(ClawPort, 10);
-pause(5);
-brick.StopMotor(ClawPort, 'Brake');
