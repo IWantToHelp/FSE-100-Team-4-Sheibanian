@@ -98,7 +98,7 @@ while color ~= destinationColor
         brick.MoveMotor(MotorPortLeft, AutoSpeed);
         brick.MoveMotor(MotorPortRight, AutoSpeed);
         pause(1);
-    %The robot is between too close to the left 
+    %The robot is too close to the left 
     elseif distance > wallMaxDist && distance < wallDist
         %the car is too close to the left so we move it back and we turn 
         %it right a litte, then have it move forward to make a small
@@ -169,7 +169,7 @@ end
 %and to adjust the car for the next run back to its startColor
 run("keyboard_control.m");
 %this time we run auto for the startingColor
-while color ~= destinationColor
+while color ~= startingColor
     %while we are not at a red line, we perform the code below
     while color~=5
     %displays the current color, distance from wall and whether the color sensor is activated 
@@ -215,7 +215,7 @@ while color ~= destinationColor
         brick.MoveMotor(MotorPortLeft, AutoSpeed);
         brick.MoveMotor(MotorPortRight, AutoSpeed);
         pause(1);
-    %The robot is between too close to the left 
+    %The robot is too close to the left 
     elseif distance > wallMaxDist && distance < wallDist
         %the car is too close to the left so we move it back and we turn 
         %it right a litte, then have it move forward to make a small
